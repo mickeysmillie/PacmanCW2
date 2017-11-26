@@ -240,6 +240,7 @@ class MapAgent(Agent):
 
     # For now I just move randomly, but I display the map to show my progress
     def getAction(self, state):
+
         legal = api.legalActions(state)
         self.updateFoodInMap(state)
         self.updateGhostsInMap(state)
@@ -253,20 +254,42 @@ class MapAgent(Agent):
         # Get the actions we can try, and remove "STOP" if that is one of them.
         legal = api.legalActions(state)
         print legal
+
         if Directions.STOP in legal:
             legal.remove(Directions.STOP)
 
         # Need to add in my MEU code here and change the values assigned to the map from star and spaces to values
         pacman = api.whereAmI(state)
 
-
-
+        #down
         self.UtilityVal[0] = self.utilmapN.getValue(pacman[0],pacman[1]+1)
+        #up
         self.UtilityVal[1] = self.utilmapN.getValue(pacman[0],pacman[1]-1)
+        #right
         self.UtilityVal[2] = self.utilmapN.getValue(pacman[0]+1,pacman[1])
+        #left
         self.UtilityVal[3] = self.utilmapN.getValue(pacman[0]-1,pacman[1])
 
-        MaxVal = max(self.UtilityVal)
+
+        UT_sorted = sorted(self.UtilityVal)
+
+        for i in xrange(length(UT_sorted)):
+            UT = UT_sorted[length(UT_sorted) - i]
+
+            if UT == self.UtilityVal[0]:
+                if Directions.South in legal:
+                    return api.makeMove(Directions.SOUTH,legal)
+            if UT == self.UtilityVal[1]:
+                if Directions.NORTH in legal:
+                    return api.makeMove(Directions.NORTH,legal)
+            if UT == self.UtilityVal[2]:
+                if Directions.EAST in legal:
+                    return api.makeMove(Directions.EAST,legal)
+            if UT == self.UtilityVal[3]:
+                if Directions.WEST in legal:
+                    return api.makeMove(Directions.WEST,legal)
+
+
 
 
 
@@ -281,23 +304,23 @@ class MapAgent(Agent):
         # MeuE = (0.8 * pacMapValE) + (0.1 * pacMapValN) + (0.1 * pacMapValS)
         # MeuW = (0.8 * pacMapValW) + (0.1 * pacMapValN) + (0.1 * pacMapValS)
 
-        if Directions.NORTH in legal:
-            if self.UtilityVal[0] >= max(self.UtilityVal[1], self.UtilityVal[2], self.UtilityVal[3]):
-                return api.makeMove(Directions.NORTH, legal)
-
-        if Directions.SOUTH in legal:
-            if self.UtilityVal[1] >= max(self.UtilityVal[0], self.UtilityVal[2], self.UtilityVal[3]):
-                return api.makeMove(Directions.SOUTH, legal)
-
-        if Directions.EAST in legal:
-            if self.UtilityVal[2] >= max(self.UtilityVal[0], self.UtilityVal[1], self.UtilityVal[3]):
-                return api.makeMove(Directions.EAST, legal)
-
-        if Directions.WEST in legal:
-            if self.UtilityVal[3] >= max(self.UtilityVal[0], self.UtilityVal[1], self.UtilityVal[2]):
-                return api.makeMove(Directions.WEST, legal)
-
         # if Directions.NORTH in legal:
+        #     if self.UtilityVal[0] >= max(self.UtilityVal[1], self.UtilityVal[2], self.UtilityVal[3]):
+        #         return api.makeMove(Directions.NORTH, legal)
+        #
+        # if Directions.SOUTH in legal:
+        #     if self.UtilityVal[1] >= max(self.UtilityVal[0], self.UtilityVal[2], self.UtilityVal[3]):
+        #         return api.makeMove(Directions.SOUTH, legal)
+        #
+        # if Directions.EAST in legal:
+        #     if self.UtilityVal[2] >= max(self.UtilityVal[0], self.UtilityVal[1], self.UtilityVal[3]):
+        #         return api.makeMove(Directions.EAST, legal)
+        #
+        # if Directions.WEST in legal:
+        #     if self.UtilityVal[3] >= max(self.UtilityVal[0], self.UtilityVal[1], self.UtilityVal[2]):
+        #         return api.makeMove(Directions.WEST, legal)
+        #
+        # # if Directions.NORTH in legal:
         #     if MeuN >= max(MeuS, MeuE, MeuW):
         #         MaxVal = MeuN
         # if Directions.SOUTH in legal:
