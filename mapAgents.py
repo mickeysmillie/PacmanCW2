@@ -208,8 +208,8 @@ class MapAgent(Agent):
 
 
     def UtilityCalc(self,legal):
-        for i in xrange(self.map.getWidth()-1):
-            for j in xrange(self.map.getHeight()-1):
+        for i in xrange(self.map.getHeight()-1):
+            for j in xrange(self.map.getWidth()-1):
                 Current_util = self.utilmapP.getValue(i,j)
                 R = self.RewardConversion(self.map.getValue(i,j))
                 up = self.utilmapP.getValue(i,j-1)
@@ -261,33 +261,41 @@ class MapAgent(Agent):
         # Need to add in my MEU code here and change the values assigned to the map from star and spaces to values
         pacman = api.whereAmI(state)
 
-        #down
+        #EAST
         self.UtilityVal[0] = self.utilmapN.getValue(pacman[0],pacman[1]+1)
-        #up
+        #WEST
         self.UtilityVal[1] = self.utilmapN.getValue(pacman[0],pacman[1]-1)
-        #right
+        #SOUTH
         self.UtilityVal[2] = self.utilmapN.getValue(pacman[0]+1,pacman[1])
-        #left
+        #NORTH
         self.UtilityVal[3] = self.utilmapN.getValue(pacman[0]-1,pacman[1])
+        print self.UtilityVal
 
+        a = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        print a[1][1]
+        print 'j-1', a[1][0]
+        print a[1][2]
+        print 'i-1',a[0][1]
+        print a[2][1]
 
         UT_sorted = sorted(self.UtilityVal)
-
-        for i in xrange(length(UT_sorted)):
-            UT = UT_sorted[length(UT_sorted) - i]
+        print UT_sorted
+        for i in xrange(len(UT_sorted)):
+            print len(UT_sorted)
+            UT = UT_sorted[len(UT_sorted) - 1 - i]
 
             if UT == self.UtilityVal[0]:
-                if Directions.South in legal:
-                    return api.makeMove(Directions.SOUTH,legal)
-            if UT == self.UtilityVal[1]:
-                if Directions.NORTH in legal:
-                    return api.makeMove(Directions.NORTH,legal)
-            if UT == self.UtilityVal[2]:
                 if Directions.EAST in legal:
                     return api.makeMove(Directions.EAST,legal)
-            if UT == self.UtilityVal[3]:
+            if UT == self.UtilityVal[1]:
                 if Directions.WEST in legal:
                     return api.makeMove(Directions.WEST,legal)
+            if UT == self.UtilityVal[2]:
+                if Directions.SOUTH in legal:
+                    return api.makeMove(Directions.SOUTH,legal)
+            if UT == self.UtilityVal[3]:
+                if Directions.NORTH in legal:
+                    return api.makeMove(Directions.NORTH,legal)
 
 
 
