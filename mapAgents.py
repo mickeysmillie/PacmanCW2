@@ -129,11 +129,10 @@ class MapAgent(Agent):
          self.makeMap(state)
          self.addWallsToMap(state)
          self.updateFoodInMap(state)
-         self.map.display()
+         #self.map.display()
          self.UtilityVal = [0, 0, 0, 0]
-         self.sold = 0
-         self.snew = 0
-         self.diff = 10
+         self.lastmove = Directions.STOP
+         self.llastmove = Directions.STOP
          self.i = 0
     # This is what gets run when the game ends.
     def final(self, state):
@@ -142,7 +141,7 @@ class MapAgent(Agent):
     # Make a map by creating a grid of the right size
     def makeMap(self,state):
         corners = api.corners(state)
-        print corners
+        #print corners
         height = self.getLayoutHeight(corners)
         width  = self.getLayoutWidth(corners)
         self.map = Grid(width, height)
@@ -197,17 +196,17 @@ class MapAgent(Agent):
     def RewardConversion(self,Mapvalue):
         #print Mapvalue
         if Mapvalue == '*':
-            return int(5)
+            return 50
         elif Mapvalue == " ":
-            return int(2)
+            return 1
         elif Mapvalue == '%':
-            return int(0)
+            return 0
         elif Mapvalue == '!':
-            return int(-100)
+            return -100
 
     def InitUP(self):
-        for i in xrange(self.map.getHeight()-1):
-            for j in xrange(self.map.getWidth()-1):
+        for i in xrange(self.map.getWidth()-1):
+            for j in xrange(self.map.getHeight()-1):
                 R = self.RewardConversion(self.map.getValue(i,j))
                 self.utilmapP.setValue(i, j, R)
 
@@ -267,76 +266,65 @@ class MapAgent(Agent):
         legal = api.legalActions(state)
         self.updateFoodInMap(state)
         self.updateGhostsInMap(state)
-        self.map.prettyDisplay()
+        #self.map.prettyDisplay()
         if self.i == 0:
             self.InitUP()
             self.i = 1
 
-        self.utilmapP.prettyDisplay()
+        #self.utilmapP.prettyDisplay()
         # ---------------------------------------------------------------------
-        print 'initial'
-        print self.sold
-        print self.snew
-        print 'DIFF',self.diff
+        #print 'initial'
 
-        for count in xrange(15):
-
-            print 'while'
-            print self.sold
-            print self.snew
-            print self.diff
-            self.snew = 0
-            self.sold = 0
-            for i in xrange(self.map.getHeight()-1):
-                for j in xrange(self.map.getWidth()-1):
+        count = 1
+        for count in xrange(20):
+            for i in xrange(self.map.getWidth()-1):
+                for j in xrange(self.map.getHeight()-1):
                     Current_util = self.utilmapP.getValue(i,j)
                     R = self.RewardConversion(self.map.getValue(i,j))
                     if R == 0:
-                        continue
+                      continue
                     # MAP origin is the bottom left
-                    up = self.utilmapP.getValue(i+1,j)
-                    down = self.utilmapP.getValue(i-1,j)
-                    left = self.utilmapP.getValue(i,j-1)
-                    right = self.utilmapP.getValue(i,j+1)
-                    Gamma = 0.7
 
-                    if Directions.NORTH not in legal:
-                        up = Current_util
-                    if Directions.SOUTH not in legal:
-                        down = Current_util
-                    if Directions.EAST not in legal:
-                        left = Current_util
-                    if Directions.WEST not in legal:
-                        right = Current_util
+                    walls = api.walls(state)
+                    up = self.utilmapP.getValue(i,j+1)
+                    down = self.utilmapP.getValue(i,j-1)
+                    left = self.utilmapP.getValue(i-1,j)
+                    right = self.utilmapP.getValue(i+1,j)
 
-                    print 'r',R
-                    print 'g',Gamma
-                    print 'up',up
-                    print 'down',down
-                    print 'left',left
-                    print 'right',right
+                    Gamma = 0.5
+                    #print legal
+                    #print up, down, left, right
+
+                    # if Directions.NORTH not in legal:
+                    #     up = Current_util
+                    # if Directions.SOUTH not in legal:
+                    #     down = Current_util
+                    # if Directions.EAST not in legal:
+                    #     left = Current_util
+                    # if Directions.WEST not in legal:
+                    #     right = Current_util
+                    #print legal
+                    #print up, down, left, right
+                    #raw_input('')
 
                     Bellman = R + (Gamma* max(0.8*up+0.1*left+0.1*right, \
                     0.8*down + 0.1*left + 0.1*right, \
                     0.8*left + 0.1*up + 0.1*down, \
                     0.8*right + 0.1*up + 0.1*down))
-                    print 'Bellman',Bellman
-                    self.snew = self.snew + Bellman
-                    self.sold = self.sold + self.utilmapP.getValue(i,j)
-                    self.utilmapN.setValue(i, j, Bellman)
-                    self.utilmapN.prettyDisplay()
-                    print self.sold
-                    print 'P',self.utilmapP.getValue(i,j)
-                    print 'N',self.utilmapN.getValue(i,j)
+                    #print 'Bellman',Bellman
+
+                    self.utilmapN.setValue(i, j, round(Bellman,4))
+                    #self.utilmapN.prettyDisplay()
+
+                    #print 'P',self.utilmapP.getValue(i,j)
+                    #print 'N',self.utilmapN.getValue(i,j)
+
                     #raw_input('')
-            self.diff = self.snew - self.sold
-            self.utilmapP.prettyDisplay()
-            self.utilmapN.prettyDisplay()
+            #self.utilmapP.prettyDisplay()
+            #self.utilmapN.prettyDisplay()
             self.utilmapP = self.utilmapN
-            print 'update'
-            print self.sold
-            print self.snew
-            print self.diff
+            #print 'update'
+
 
 
         # --------------------------------------------------------------------
@@ -345,53 +333,64 @@ class MapAgent(Agent):
 
 
         #print 'P:'
-        self.utilmapP.prettyDisplay()
+        #self.utilmapP.prettyDisplay()
         #print 'N:'
-        self.utilmapN.prettyDisplay()
+        #self.utilmapN.prettyDisplay()
 
 
         # Get the actions we can try, and remove "STOP" if that is one of them.
         legal = api.legalActions(state)
-        print legal
+        #print legal
 
         if Directions.STOP in legal:
             legal.remove(Directions.STOP)
 
         # Need to add in my MEU code here and change the values assigned to the map from star and spaces to values
         pacman = api.whereAmI(state)
-        raw_input('')
         #UP
-        self.UtilityVal[0] = self.utilmapP.getValue(pacman[0],pacman[1]+1)
+        self.UtilityVal[0] = [self.utilmapP.getValue(pacman[0],pacman[1]+1), Directions.NORTH]
         #DOWN
-        self.UtilityVal[1] = self.utilmapP.getValue(pacman[0],pacman[1]-1)
+        self.UtilityVal[1] = [self.utilmapP.getValue(pacman[0],pacman[1]-1), Directions.SOUTH]
         #WEST
-        self.UtilityVal[2] = self.utilmapP.getValue(pacman[0]-1,pacman[1])
+        self.UtilityVal[2] = [self.utilmapP.getValue(pacman[0]-1,pacman[1]), Directions.WEST]
         #EAST
-        self.UtilityVal[3] = self.utilmapP.getValue(pacman[0]+1,pacman[1])
-        print self.UtilityVal
+        self.UtilityVal[3] = [self.utilmapP.getValue(pacman[0]+1,pacman[1]), Directions.EAST]
 
+        self.llastmove = self.lastmove
         UT_sorted = sorted(self.UtilityVal)
-        print UT_sorted
-        print 'up down west east'
+        # print UT_sorted
+        # if self.lastmove == UT_sorted[2][1]:
+        #     a = UT_sorted[2]
+        #     UT_sorted[2] = UT_sorted[3]
+        #     UT_sorted[3] = a
+
+
+        # print UT_sorted
+        # print self.lastmove
+        # print UT_sorted[3][1]
+        #
+        # print 'up down west east'
+        # #raw_input('')
+
         for i in xrange(len(UT_sorted)):
 
             UT = UT_sorted[len(UT_sorted) - 1 - i]
 
             if UT == self.UtilityVal[0]:
                 if Directions.NORTH in legal:
-                    print 'N'
+                    self.lastmove = Directions.NORTH
                     return api.makeMove(Directions.NORTH,legal)
             if UT == self.UtilityVal[1]:
                 if Directions.SOUTH in legal:
-                    print 'S'
+                    self.lastmove = Directions.SOUTH
                     return api.makeMove(Directions.SOUTH,legal)
             if UT == self.UtilityVal[2]:
                 if Directions.WEST in legal:
-                    print 'W'
+                    self.lastmove = Directions.WEST
                     return api.makeMove(Directions.WEST,legal)
             if UT == self.UtilityVal[3]:
                 if Directions.EAST in legal:
-                    print 'E'
+                    self.lastmove = Directions.EAST
                     return api.makeMove(Directions.EAST,legal)
 
         # Random choice between the legal options.
