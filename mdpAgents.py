@@ -5,7 +5,7 @@ import random
 import game
 import util
 import sys
-from mapAgenta import Grid
+from mapAgents import Grid
 
 
 class MDPAgent(Agent):
