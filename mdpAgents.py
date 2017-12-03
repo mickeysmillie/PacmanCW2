@@ -28,6 +28,7 @@ class MDPAgent(Agent):
          self.lastmove = Directions.STOP
          self.i = 0
 
+
     # This is what gets run when the game ends.
     def final(self, state):
         print "Looks like I just died!"
@@ -90,7 +91,7 @@ class MDPAgent(Agent):
         if Mapvalue == '*':
             return 50
         elif Mapvalue == " ":
-            return 1
+            return -0.1
         elif Mapvalue == '%':
             return 0
         elif Mapvalue == '!':
@@ -102,9 +103,9 @@ class MDPAgent(Agent):
         self.updateFoodInMap(state)
         self.updateGhostsInMap(state)
 
-        it = 1
+
         # Calculate utility values for map over a fixed amount of iterations to ensure convergence
-        for count in xrange(15):
+        for count in xrange(5):
             for i in xrange(self.map.getWidth()-1):
                 for j in xrange(self.map.getHeight()-1):
                     R = self.RewardConversion(self.map.getValue(i,j))
@@ -119,8 +120,11 @@ class MDPAgent(Agent):
                     down = self.utilmapP.getValue(i,j-1)
                     left = self.utilmapP.getValue(i-1,j)
                     right = self.utilmapP.getValue(i+1,j)
-
                     Gamma = 0.6
+                    if R == -10:
+                        Gamma = 0.2
+
+
 
                     Bellman = R + (Gamma* max(0.8*up+0.1*left+0.1*right, \
                     0.8*down + 0.1*left + 0.1*right, \
@@ -129,13 +133,14 @@ class MDPAgent(Agent):
                     self.utilmapN.setValue(i, j, round(Bellman,4))
 
 
-            #print 'iteration:' it
+
             self.utilmapP = self.utilmapN
-            #it = it + 1
+        #print self.utilmapP.prettyDisplay()
         #raw_input('')
 
+
         # --------------------------------------------------------------------
-        #Remove Stop if in legal actiona
+        #Remove Stop if in legal actions
         if Directions.STOP in legal:
             legal.remove(Directions.STOP)
         pacman = api.whereAmI(state)
