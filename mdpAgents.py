@@ -91,28 +91,52 @@ class MDPAgent(Agent):
         if Mapvalue == '*':
             return 50
         elif Mapvalue == " ":
+<<<<<<< HEAD
             return -0.1
+=======
+            return -0.5
+>>>>>>> 4e8e27ac24a35356f484deecb6f5edf8606738fc
         elif Mapvalue == '%':
             return 0
         elif Mapvalue == '!':
             return -100
+
+    def InitUP(self):
+        for i in xrange(self.map.getWidth()-1):
+            for j in xrange(self.map.getHeight()-1):
+                 R = self.RewardConversion(self.map.getValue(i,j))
+                 self.utilmapP.setValue(i, j, R)
 
     def getAction(self, state):
         #Initialise legal moves, food and ghost position
         legal = api.legalActions(state)
         self.updateFoodInMap(state)
         self.updateGhostsInMap(state)
+<<<<<<< HEAD
 
 
+=======
+        if self.i == 0:
+            self.InitUP()
+            self.i = 1
+>>>>>>> 4e8e27ac24a35356f484deecb6f5edf8606738fc
         # Calculate utility values for map over a fixed amount of iterations to ensure convergence
         for count in xrange(5):
             for i in xrange(self.map.getWidth()-1):
                 for j in xrange(self.map.getHeight()-1):
+                    Current_util = self.utilmapP.getValue(i,j)
                     R = self.RewardConversion(self.map.getValue(i,j))
-
                     #Ignore walls
                     if R == 0:
                       continue
+                    if Directions.NORTH not in legal:
+                       up = Current_util
+                    if Directions.SOUTH not in legal:
+                        down = Current_util
+                    if Directions.EAST not in legal:
+                        left = Current_util
+                    if Directions.WEST not in legal:
+                        right = Current_util
 
                     # MAP origin is the bottom left
                     walls = api.walls(state)
@@ -130,13 +154,16 @@ class MDPAgent(Agent):
                     0.8*down + 0.1*left + 0.1*right, \
                     0.8*left + 0.1*up + 0.1*down, \
                     0.8*right + 0.1*up + 0.1*down))
-                    self.utilmapN.setValue(i, j, round(Bellman,4))
+                    self.utilmapN.setValue(i, j, round(Bellman,6))
 
-
+<<<<<<< HEAD
 
             self.utilmapP = self.utilmapN
         #print self.utilmapP.prettyDisplay()
         #raw_input('')
+=======
+            self.utilmapP = self.utilmapN
+>>>>>>> 4e8e27ac24a35356f484deecb6f5edf8606738fc
 
 
         # --------------------------------------------------------------------
